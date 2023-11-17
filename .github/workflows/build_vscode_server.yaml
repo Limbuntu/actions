@@ -24,16 +24,20 @@ jobs:
       - uses: actions/checkout@main
       - name: Checkout repository
         run: |
+          echo "PWD=${PWD}"
+          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
           env
           cat /proc/cpuinfo
           tree -L 2 ${GITHUB_WORKSPACE}
 
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.0.0
+        with:
+          # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+          node-version: 18.15.0
+
       - name: Fetch source code and patch
         run: |
-          pwd && ls
-          echo "PWD=${PWD}"
-          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
-
           git clone https://github.com/microsoft/vscode
           cd vscode
           git checkout ${{ github.event.inputs.commit }}
