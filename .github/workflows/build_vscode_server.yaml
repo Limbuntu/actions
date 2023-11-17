@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@main
-      - name: Checkout Repository
+      - name: Checkout repository
         run: |
           env
           cat /proc/cpuinfo
