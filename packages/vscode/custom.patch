@@ -1,0 +1,131 @@
+diff --git a/product.json b/product.json
+index 605d8f117ee..10988b15294 100644
+--- a/product.json
++++ b/product.json
+@@ -80,5 +80,52 @@
+ 				"publisherDisplayName": "Microsoft"
+ 			}
+ 		}
+-	]
++	],
++    "extensionsGallery": {
++		"nlsBaseUrl": "https://www.vscode-unpkg.net/_lp/",
++		"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
++		"cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
++		"itemUrl": "https://marketplace.visualstudio.com/items",
++		"publisherUrl": "https://marketplace.visualstudio.com/publishers",
++		"resourceUrlTemplate": "https://{publisher}.vscode-unpkg.net/{publisher}/{name}/{version}/{path}",
++		"controlUrl": "https://az764295.vo.msecnd.net/extensions/marketplace.json"
++	  },
++	  "linkProtectionTrustedDomains": [
++		"https://*.visualstudio.com",
++		"https://*.microsoft.com",
++		"https://aka.ms",
++		"https://*.gallerycdn.vsassets.io",
++		"https://*.github.com",
++		"https://login.microsoftonline.com",
++		"https://*.vscode.dev",
++		"https://*.github.dev",
++		"https://gh.io",
++		"https://portal.azure.com"
++	  ],
++	  "trustedExtensionAuthAccess": [
++		"vscode.git",
++		"vscode.github",
++		"ms-vscode.remote-repositories",
++		"github.remotehub",
++		"ms-vscode.azure-repos",
++		"ms-vscode.remote-server",
++		"github.vscode-pull-request-github",
++		"github.codespaces",
++		"ms-vsliveshare.vsliveshare",
++		"github.copilot",
++		"github.copilot-chat",
++		"ms-azuretools.vscode-azureresourcegroups",
++		"ms-edu.vscode-learning"
++	  ],
++	  "trustedExtensionProtocolHandlers": [
++		"vscode.git",
++		"vscode.github-authentication",
++		"vscode.microsoft-authentication"
++	  ],
++	  "auth": {
++		"loginUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
++		"tokenUrl": "https://login.microsoftonline.com/common/oauth2/token",
++		"redirectUrl": "https://vscode-redirect.azurewebsites.net/",
++		"clientId": "aebc6443-996d-45c2-90f0-388ff96faa56"
++	  }
+ }
+diff --git a/src/vs/base/browser/ui/contextview/contextview.ts b/src/vs/base/browser/ui/contextview/contextview.ts
+index d8156d1b3bb..d146bcc04fe 100644
+--- a/src/vs/base/browser/ui/contextview/contextview.ts
++++ b/src/vs/base/browser/ui/contextview/contextview.ts
+@@ -246,7 +246,7 @@ export class ContextView extends Disposable {
+ 			return;
+ 		}
+ 
+-		if (this.delegate!.canRelayout === false && !(platform.isIOS && BrowserFeatures.pointerEvents)) {
++		if (this.delegate!.canRelayout === false && !(platform.isIOS && BrowserFeatures.pointerEvents) && !platform.isAndroid) {
+ 			this.hide();
+ 			return;
+ 		}
+diff --git a/src/vs/base/browser/ui/dialog/dialog.css b/src/vs/base/browser/ui/dialog/dialog.css
+index 9b7681e1fa8..e9b69d2e933 100644
+--- a/src/vs/base/browser/ui/dialog/dialog.css
++++ b/src/vs/base/browser/ui/dialog/dialog.css
+@@ -25,7 +25,7 @@
+ 	display: flex;
+ 	flex-direction: column-reverse;
+ 	width: min-content;
+-	min-width: 500px;
++	width: 500px;
+ 	max-width: 90vw;
+ 	min-height: 75px;
+ 	padding: 10px;
+diff --git a/src/vs/platform/environment/node/userDataPath.js b/src/vs/platform/environment/node/userDataPath.js
+index 92898523ed1..92bd5522301 100644
+--- a/src/vs/platform/environment/node/userDataPath.js
++++ b/src/vs/platform/environment/node/userDataPath.js
+@@ -91,6 +91,7 @@
+ 				case 'darwin':
+ 					appDataPath = path.join(os.homedir(), 'Library', 'Application Support');
+ 					break;
++				case 'android':
+ 				case 'linux':
+ 					appDataPath = process.env['XDG_CONFIG_HOME'] || path.join(os.homedir(), '.config');
+ 					break;
+diff --git a/src/vs/platform/quickinput/browser/quickInputController.ts b/src/vs/platform/quickinput/browser/quickInputController.ts
+index 86976df649f..f4f759b7a79 100644
+--- a/src/vs/platform/quickinput/browser/quickInputController.ts
++++ b/src/vs/platform/quickinput/browser/quickInputController.ts
+@@ -677,7 +677,7 @@ export class QuickInputController extends Disposable {
+ 			this.ui.container.style.top = `${this.titleBarOffset}px`;
+ 
+ 			const style = this.ui.container.style;
+-			const width = Math.min(this.dimension!.width * 0.62 /* golden cut */, QuickInputController.MAX_WIDTH);
++			const width = Math.min(this.dimension!.width * 0.9 /* golden cut */, QuickInputController.MAX_WIDTH);
+ 			style.width = width + 'px';
+ 			style.marginLeft = '-' + (width / 2) + 'px';
+ 
+diff --git a/src/vs/workbench/browser/parts/titlebar/menubarControl.ts b/src/vs/workbench/browser/parts/titlebar/menubarControl.ts
+index 552e59959ab..1842d32a2b4 100644
+--- a/src/vs/workbench/browser/parts/titlebar/menubarControl.ts
++++ b/src/vs/workbench/browser/parts/titlebar/menubarControl.ts
+@@ -11,7 +11,7 @@ import { IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
+ import { IAction, Action, SubmenuAction, Separator, IActionRunner, ActionRunner, WorkbenchActionExecutedEvent, WorkbenchActionExecutedClassification, toAction } from 'vs/base/common/actions';
+ import { addDisposableListener, Dimension, EventType } from 'vs/base/browser/dom';
+ import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
+-import { isMacintosh, isWeb, isIOS, isNative } from 'vs/base/common/platform';
++import { isMacintosh, isWeb, isIOS, isNative, isAndroid } from 'vs/base/common/platform';
+ import { IConfigurationService, IConfigurationChangeEvent } from 'vs/platform/configuration/common/configuration';
+ import { Event, Emitter } from 'vs/base/common/event';
+ import { Disposable, DisposableStore } from 'vs/base/common/lifecycle';
+@@ -790,7 +790,7 @@ export class CustomMenubarControl extends MenubarControl {
+ 		super.registerListeners();
+ 
+ 		this._register(addDisposableListener(window, EventType.RESIZE, () => {
+-			if (this.menubar && !(isIOS && BrowserFeatures.pointerEvents)) {
++			if (this.menubar && !(isIOS && BrowserFeatures.pointerEvents) && !isAndroid) {
+ 				this.menubar.blur();
+ 			}
+ 		}));

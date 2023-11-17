@@ -1,0 +1,42 @@
+name: Workflow template
+on:
+  workflow_dispatch:
+    inputs:
+      msg:
+        description: "message:"
+        default: "Hello World!"
+        required: true
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    env:
+      arch: ${{ github.event.inputs.msg }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target_arch: [x64, arm64]
+
+    steps:
+      - uses: actions/checkout@main
+      - name: Print env ${{ matrix.target_arch}}
+        shell: bash {0}
+        env:
+          PACKAGE_VARIANT: ${{ matrix.target_arch }}
+        run: |
+          ls ${GITHUB_WORKSPACE}
+          echo PACKAGE_VARIANT=${PACKAGE_VARIANT}
+          env
+          cat /proc/cpuinfo
+          tree -L 2 ${GITHUB_WORKSPACE}
+
+      - name: Create files
+        run: |
+          echo "echo hello world" > echo_hello
+          chmod +x echo_hello
+          tar -c echo_hello | gzip > echo_hello.tar.gz
+
+      - uses: actions/upload-artifact@main
+        with:
+          name: github_actions_upload_artifact_raw
+          path: echo_hello
