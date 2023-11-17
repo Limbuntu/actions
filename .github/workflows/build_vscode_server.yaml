@@ -27,8 +27,6 @@ jobs:
       - uses: actions/checkout@main
       - name: Checkout repository
         run: |
-          echo "PWD=${PWD}"
-          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
           env
           cat /proc/cpuinfo
           tree -L 2 ${GITHUB_WORKSPACE}
