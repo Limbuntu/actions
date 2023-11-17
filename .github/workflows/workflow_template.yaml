@@ -19,13 +19,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@main
-      - name: Print env ${{ matrix.target_arch}}
+      - name: Checkout repository
         shell: bash {0}
         env:
           PACKAGE_VARIANT: ${{ matrix.target_arch }}
         run: |
-          ls ${GITHUB_WORKSPACE}
-          echo PACKAGE_VARIANT=${PACKAGE_VARIANT}
           env
           cat /proc/cpuinfo
           tree -L 2 ${GITHUB_WORKSPACE}
@@ -36,7 +34,8 @@ jobs:
           chmod +x echo_hello
           tar -c echo_hello | gzip > echo_hello.tar.gz
 
-      - uses: actions/upload-artifact@main
+      - name: Upload
+        uses: actions/upload-artifact@main
         with:
-          name: github_actions_upload_artifact_raw
+          name: workflow_template
           path: echo_hello
