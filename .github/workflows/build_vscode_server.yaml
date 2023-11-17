@@ -66,12 +66,12 @@ jobs:
 
             matrix_task="$1"
             case "${matrix_task}" in
-            vscode-reh-web-linux-x64-*)
+            vscode-reh-web-linux-x64*)
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
               yarn || yarn
               yarn gulp $matrix_task
               ;;
-            vscode-reh-web-linux-arm64-*)
+            vscode-reh-web-linux-arm64*)
               sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               TARGET=aarch64-linux-gnu
               SYSROOT=${PWD}/../aarch64-linux-ubuntu
@@ -83,7 +83,7 @@ jobs:
               yarn || yarn
               yarn gulp $matrix_task
               ;;
-            vscode-reh-web-android-arm64-*)
+            vscode-reh-web-android-arm64*)
               ## Modify based on linux-arm64
               build_task "$(echo "${matrix_task}" | sed 's/android/linux/')"
               echo "Patching for android..."
