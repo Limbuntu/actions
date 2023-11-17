@@ -61,7 +61,7 @@ jobs:
             case "${matrix_task}" in
             vscode-reh-web-linux-x64-*)
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
-              yarn
+              yarn || yarn
               yarn gulp $matrix_task
               ;;
             vscode-reh-web-linux-arm64-*)
@@ -73,7 +73,7 @@ jobs:
               export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
               export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
               export npm_config_arch=aarch64
-              yarn
+              yarn || yarn
               yarn gulp $matrix_task
               ;;
             vscode-reh-web-android-arm64-*)
