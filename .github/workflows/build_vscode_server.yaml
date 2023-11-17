@@ -20,7 +20,7 @@ jobs:
             vscode-reh-web-android-arm64-min,
             vscode-reh-web-linux-x64,
             vscode-reh-web-linux-arm64,
-            vscode-reh-web-android-arm64-min
+            vscode-reh-web-android-arm64
           ]
 
     steps:
