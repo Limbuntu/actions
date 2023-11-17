@@ -1,6 +1,6 @@
---- trap-handler.h	2023-11-17 02:43:29.470378039 +0800
-+++ trap-handler.new.h	2023-11-17 02:51:59.781969281 +0800
-@@ -17,30 +17,7 @@
+--- trap-handler.h	2023-11-18 04:30:59.743798819 +0800
++++ fixed-trap-handler.h	2023-11-18 04:32:17.751201420 +0800
+@@ -17,31 +17,7 @@
  namespace internal {
  namespace trap_handler {
  
@@ -28,6 +28,7 @@
 -#else
  #define V8_TRAP_HANDLER_SUPPORTED false
 -#endif
- 
+-
  #if V8_OS_ANDROID && V8_TRAP_HANDLER_SUPPORTED
  // It would require some careful security review before the trap handler
+ // can be enabled on Android.  Android may do unexpected things with signal
