@@ -18,6 +18,9 @@ jobs:
             vscode-reh-web-linux-x64-min,
             vscode-reh-web-linux-arm64-min,
             vscode-reh-web-android-arm64-min,
+            vscode-reh-web-linux-x64,
+            vscode-reh-web-linux-arm64,
+            vscode-reh-web-android-arm64-min
           ]
 
     steps:
@@ -81,8 +84,8 @@ jobs:
               yarn gulp $matrix_task
               ;;
             vscode-reh-web-android-arm64-*)
-              ## Based on linux-arm64
-              build_task vscode-reh-web-linux-arm64-min
+              ## Modify based on linux-arm64
+              build_task "$(echo "${matrix_task}" | sed 's/android/linux/')"
               echo "Patching for android..."
               _RELEASE_DIR="${PWD}/../vscode-reh-web-android-arm64"
               mv "${PWD}/../vscode-reh-web-linux-arm64" "${_RELEASE_DIR}"
