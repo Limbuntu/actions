@@ -56,6 +56,61 @@ index 605d8f117ee..10988b15294 100644
 +		"clientId": "aebc6443-996d-45c2-90f0-388ff96faa56"
 +	  }
  }
+diff --git a/src/vs/base/browser/touch.ts b/src/vs/base/browser/touch.ts
+index dd74dca3eb4..45f7df1af8f 100644
+--- a/src/vs/base/browser/touch.ts
++++ b/src/vs/base/browser/touch.ts
+@@ -73,6 +73,7 @@ export class Gesture extends Disposable {
+ 	private static readonly HOLD_DELAY = 700;
+ 
+ 	private dispatched = false;
++	private dispatchedEventType: string | undefined;
+ 	private readonly targets = new LinkedList<HTMLElement>();
+ 	private readonly ignoreTargets = new LinkedList<HTMLElement>();
+ 	private handle: IDisposable | null;
+@@ -197,7 +198,7 @@ export class Gesture extends Disposable {
+ 				const evt = this.newGestureEvent(EventType.Tap, data.initialTarget);
+ 				evt.pageX = arrays.tail(data.rollingPageX);
+ 				evt.pageY = arrays.tail(data.rollingPageY);
+-				this.dispatchEvent(evt);
++								this.dispatchEvent(evt);
+ 
+ 			} else if (holdTime >= Gesture.HOLD_DELAY
+ 				&& Math.abs(data.initialPageX - arrays.tail(data.rollingPageX)) < 30
+@@ -206,7 +207,7 @@ export class Gesture extends Disposable {
+ 				const evt = this.newGestureEvent(EventType.Contextmenu, data.initialTarget);
+ 				evt.pageX = arrays.tail(data.rollingPageX);
+ 				evt.pageY = arrays.tail(data.rollingPageY);
+-				this.dispatchEvent(evt);
++								this.dispatchEvent(evt);
+ 
+ 			} else if (activeTouchCount === 1) {
+ 				const finalX = arrays.tail(data.rollingPageX);
+@@ -226,16 +227,22 @@ export class Gesture extends Disposable {
+ 					deltaY > 0 ? 1 : -1,		// y direction
+ 					finalY						// y now
+ 				);
++
++				this.dispatchedEventType = EventType.Change;
+ 			}
+ 
+ 
+ 			this.dispatchEvent(this.newGestureEvent(EventType.End, data.initialTarget));
+ 			// forget about this touch
+ 			delete this.activeTouches[touch.identifier];
+-		}
++					}
+ 
+ 		if (this.dispatched) {
+-			e.preventDefault();
++			// make keyboard do not popout when scrolling
++			if (this.dispatchedEventType !== EventType.Change) {
++				e.preventDefault();
++			}
++			this.dispatchedEventType = undefined;
+ 			e.stopPropagation();
+ 			this.dispatched = false;
+ 		}
 diff --git a/src/vs/base/browser/ui/contextview/contextview.ts b/src/vs/base/browser/ui/contextview/contextview.ts
 index d8156d1b3bb..d146bcc04fe 100644
 --- a/src/vs/base/browser/ui/contextview/contextview.ts
