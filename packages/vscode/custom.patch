@@ -57,7 +57,7 @@ index 605d8f117ee..10988b15294 100644
 +	  }
  }
 diff --git a/src/vs/base/browser/touch.ts b/src/vs/base/browser/touch.ts
-index dd74dca3eb4..45f7df1af8f 100644
+index dd74dca3eb4..4e997aff600 100644
 --- a/src/vs/base/browser/touch.ts
 +++ b/src/vs/base/browser/touch.ts
 @@ -73,6 +73,7 @@ export class Gesture extends Disposable {
@@ -68,25 +68,7 @@ index dd74dca3eb4..45f7df1af8f 100644
  	private readonly targets = new LinkedList<HTMLElement>();
  	private readonly ignoreTargets = new LinkedList<HTMLElement>();
  	private handle: IDisposable | null;
-@@ -197,7 +198,7 @@ export class Gesture extends Disposable {
- 				const evt = this.newGestureEvent(EventType.Tap, data.initialTarget);
- 				evt.pageX = arrays.tail(data.rollingPageX);
- 				evt.pageY = arrays.tail(data.rollingPageY);
--				this.dispatchEvent(evt);
-+								this.dispatchEvent(evt);
- 
- 			} else if (holdTime >= Gesture.HOLD_DELAY
- 				&& Math.abs(data.initialPageX - arrays.tail(data.rollingPageX)) < 30
-@@ -206,7 +207,7 @@ export class Gesture extends Disposable {
- 				const evt = this.newGestureEvent(EventType.Contextmenu, data.initialTarget);
- 				evt.pageX = arrays.tail(data.rollingPageX);
- 				evt.pageY = arrays.tail(data.rollingPageY);
--				this.dispatchEvent(evt);
-+								this.dispatchEvent(evt);
- 
- 			} else if (activeTouchCount === 1) {
- 				const finalX = arrays.tail(data.rollingPageX);
-@@ -226,16 +227,22 @@ export class Gesture extends Disposable {
+@@ -226,6 +227,8 @@ export class Gesture extends Disposable {
  					deltaY > 0 ? 1 : -1,		// y direction
  					finalY						// y now
  				);
@@ -95,16 +77,13 @@ index dd74dca3eb4..45f7df1af8f 100644
  			}
  
  
- 			this.dispatchEvent(this.newGestureEvent(EventType.End, data.initialTarget));
- 			// forget about this touch
- 			delete this.activeTouches[touch.identifier];
--		}
-+					}
+@@ -235,7 +238,11 @@ export class Gesture extends Disposable {
+ 		}
  
  		if (this.dispatched) {
 -			e.preventDefault();
-+			// make keyboard do not popout when scrolling
-+			if (this.dispatchedEventType !== EventType.Change) {
++			// make virtual keyboard do not popup up on android when scrolling
++			if(this.dispatchedEventType !== EventType.Change){
 +				e.preventDefault();
 +			}
 +			this.dispatchedEventType = undefined;
