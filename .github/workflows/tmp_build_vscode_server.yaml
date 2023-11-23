@@ -1,6 +1,11 @@
 name: Tmp build vscode server
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: "git branch"
+        default: Splizard/vscode-mobile
+        required: true
 
 jobs:
   build:
@@ -34,7 +39,7 @@ jobs:
 
       - name: Fetch source code and patch
         run: |
-          git clone https://github.com/zongou/vscode --branch Splizard/vscode-mobile --single-branch --depth=1
+          git clone https://github.com/zongou/vscode --branch ${{ github.event.inputs.branch }} --single-branch --depth=1
           cd vscode
 
       - name: Build
