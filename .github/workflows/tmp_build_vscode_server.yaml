@@ -34,7 +34,7 @@ jobs:
 
       - name: Fetch source code and patch
         run: |
-          git clone https://github.com/zongou/vscode --branch Splizard/vscode-mobile
+          git clone https://github.com/zongou/vscode --branch Splizard/vscode-mobile --single-branch --depth=1
           cd vscode
 
       - name: Build
