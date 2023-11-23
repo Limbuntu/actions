@@ -1,4 +1,4 @@
-name: Tmporary build vscode server
+name: Tmp build vscode server
 on:
   workflow_dispatch:
 
