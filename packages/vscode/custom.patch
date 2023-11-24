@@ -154,6 +154,62 @@ index 92898523ed1..92bd5522301 100644
  				case 'linux':
  					appDataPath = process.env['XDG_CONFIG_HOME'] || path.join(os.homedir(), '.config');
  					break;
+diff --git a/src/vs/platform/extensionManagement/common/extensionManagement.ts b/src/vs/platform/extensionManagement/common/extensionManagement.ts
+index ba729ddf9a5..b3fd886eb3c 100644
+--- a/src/vs/platform/extensionManagement/common/extensionManagement.ts
++++ b/src/vs/platform/extensionManagement/common/extensionManagement.ts
+@@ -26,6 +26,7 @@ export function TargetPlatformToString(targetPlatform: TargetPlatform) {
+ 		case TargetPlatform.WIN32_ARM64: return 'Windows ARM';
+ 
+ 		case TargetPlatform.LINUX_X64: return 'Linux 64 bit';
++		case TargetPlatform.ANDROID_ARM64:
+ 		case TargetPlatform.LINUX_ARM64: return 'Linux ARM 64';
+ 		case TargetPlatform.LINUX_ARMHF: return 'Linux ARM';
+ 
+@@ -49,6 +50,7 @@ export function toTargetPlatform(targetPlatform: string): TargetPlatform {
+ 		case TargetPlatform.WIN32_ARM64: return TargetPlatform.WIN32_ARM64;
+ 
+ 		case TargetPlatform.LINUX_X64: return TargetPlatform.LINUX_X64;
++		case TargetPlatform.ANDROID_ARM64: return TargetPlatform.LINUX_ARM64;
+ 		case TargetPlatform.LINUX_ARM64: return TargetPlatform.LINUX_ARM64;
+ 		case TargetPlatform.LINUX_ARMHF: return TargetPlatform.LINUX_ARMHF;
+ 
+@@ -65,7 +67,7 @@ export function toTargetPlatform(targetPlatform: string): TargetPlatform {
+ 	}
+ }
+ 
+-export function getTargetPlatform(platform: Platform | 'alpine', arch: string | undefined): TargetPlatform {
++export function getTargetPlatform(platform: Platform | 'alpine' | 'android', arch: string | undefined): TargetPlatform {
+ 	switch (platform) {
+ 		case Platform.Windows:
+ 			if (arch === 'x64') {
+@@ -76,6 +78,7 @@ export function getTargetPlatform(platform: Platform | 'alpine', arch: string |
+ 			}
+ 			return TargetPlatform.UNKNOWN;
+ 
++		case 'android':
+ 		case Platform.Linux:
+ 			if (arch === 'x64') {
+ 				return TargetPlatform.LINUX_X64;
+diff --git a/src/vs/platform/extensions/common/extensions.ts b/src/vs/platform/extensions/common/extensions.ts
+index 222f6b91861..e03d2935db5 100644
+--- a/src/vs/platform/extensions/common/extensions.ts
++++ b/src/vs/platform/extensions/common/extensions.ts
+@@ -288,12 +288,14 @@ export const enum ExtensionType {
+ 	User
+ }
+ 
++
+ export const enum TargetPlatform {
+ 	WIN32_X64 = 'win32-x64',
+ 	WIN32_ARM64 = 'win32-arm64',
+ 
+ 	LINUX_X64 = 'linux-x64',
+ 	LINUX_ARM64 = 'linux-arm64',
++	ANDROID_ARM64 = "android-arm64",
+ 	LINUX_ARMHF = 'linux-armhf',
+ 
+ 	ALPINE_X64 = 'alpine-x64',
 diff --git a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
 index e9e83dcd70f..d358648d233 100644
 --- a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
