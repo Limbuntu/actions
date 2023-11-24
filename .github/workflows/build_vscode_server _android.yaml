@@ -97,8 +97,8 @@ jobs:
               TARGET=aarch64-linux-android24
 
               NDK_BIN_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin
-              export CC="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET} --system=${SYSROOT}"
-              export CXX="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET} -L${_TMP_BUILD_DIR}/lib --system=${SYSROOT}"
+              export CC="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET} -isystem ${SYSROOT}"
+              export CXX="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET} -L${_TMP_BUILD_DIR}/lib -isystem ${SYSROOT}"
 
 
               yarn || yarn
