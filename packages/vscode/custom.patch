@@ -1,5 +1,5 @@
 diff --git a/product.json b/product.json
-index 605d8f117ee..10988b15294 100644
+index 605d8f117ee..5fc856638c8 100644
 --- a/product.json
 +++ b/product.json
 @@ -80,5 +80,52 @@
@@ -8,7 +8,7 @@ index 605d8f117ee..10988b15294 100644
  		}
 -	]
 +	],
-+    "extensionsGallery": {
++	"extensionsGallery": {
 +		"nlsBaseUrl": "https://www.vscode-unpkg.net/_lp/",
 +		"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
 +		"cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
@@ -16,8 +16,8 @@ index 605d8f117ee..10988b15294 100644
 +		"publisherUrl": "https://marketplace.visualstudio.com/publishers",
 +		"resourceUrlTemplate": "https://{publisher}.vscode-unpkg.net/{publisher}/{name}/{version}/{path}",
 +		"controlUrl": "https://az764295.vo.msecnd.net/extensions/marketplace.json"
-+	  },
-+	  "linkProtectionTrustedDomains": [
++	},
++	"linkProtectionTrustedDomains": [
 +		"https://*.visualstudio.com",
 +		"https://*.microsoft.com",
 +		"https://aka.ms",
@@ -28,8 +28,8 @@ index 605d8f117ee..10988b15294 100644
 +		"https://*.github.dev",
 +		"https://gh.io",
 +		"https://portal.azure.com"
-+	  ],
-+	  "trustedExtensionAuthAccess": [
++	],
++	"trustedExtensionAuthAccess": [
 +		"vscode.git",
 +		"vscode.github",
 +		"ms-vscode.remote-repositories",
@@ -43,21 +43,21 @@ index 605d8f117ee..10988b15294 100644
 +		"github.copilot-chat",
 +		"ms-azuretools.vscode-azureresourcegroups",
 +		"ms-edu.vscode-learning"
-+	  ],
-+	  "trustedExtensionProtocolHandlers": [
++	],
++	"trustedExtensionProtocolHandlers": [
 +		"vscode.git",
 +		"vscode.github-authentication",
 +		"vscode.microsoft-authentication"
-+	  ],
-+	  "auth": {
++	],
++	"auth": {
 +		"loginUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
 +		"tokenUrl": "https://login.microsoftonline.com/common/oauth2/token",
 +		"redirectUrl": "https://vscode-redirect.azurewebsites.net/",
 +		"clientId": "aebc6443-996d-45c2-90f0-388ff96faa56"
-+	  }
++	}
  }
 diff --git a/src/vs/base/browser/touch.ts b/src/vs/base/browser/touch.ts
-index dd74dca3eb4..4e997aff600 100644
+index dd74dca3eb4..129613f56f1 100644
 --- a/src/vs/base/browser/touch.ts
 +++ b/src/vs/base/browser/touch.ts
 @@ -73,6 +73,7 @@ export class Gesture extends Disposable {
@@ -83,7 +83,7 @@ index dd74dca3eb4..4e997aff600 100644
  		if (this.dispatched) {
 -			e.preventDefault();
 +			// make virtual keyboard do not popup up on android when scrolling
-+			if(this.dispatchedEventType !== EventType.Change){
++			if (this.dispatchedEventType !== EventType.Change) {
 +				e.preventDefault();
 +			}
 +			this.dispatchedEventType = undefined;
@@ -104,7 +104,7 @@ index d8156d1b3bb..d146bcc04fe 100644
  			return;
  		}
 diff --git a/src/vs/base/browser/ui/dialog/dialog.css b/src/vs/base/browser/ui/dialog/dialog.css
-index 9b7681e1fa8..e9b69d2e933 100644
+index 9b7681e1fa8..023a901efe8 100644
 --- a/src/vs/base/browser/ui/dialog/dialog.css
 +++ b/src/vs/base/browser/ui/dialog/dialog.css
 @@ -25,7 +25,7 @@
@@ -116,6 +116,96 @@ index 9b7681e1fa8..e9b69d2e933 100644
  	max-width: 90vw;
  	min-height: 75px;
  	padding: 10px;
+@@ -50,7 +50,7 @@
+ 	padding: 0 10px;
+ }
+ 
+-.monaco-dialog-box .dialog-message-row > .dialog-icon.codicon {
++.monaco-dialog-box .dialog-message-row>.dialog-icon.codicon {
+ 	flex: 0 0 48px;
+ 	height: 48px;
+ 	align-self: baseline;
+@@ -66,7 +66,8 @@
+ 	padding-left: 24px;
+ 	user-select: text;
+ 	-webkit-user-select: text;
+-	word-wrap: break-word; /* never overflow long words, but break to next line */
++	word-wrap: break-word;
++	/* never overflow long words, but break to next line */
+ 	white-space: normal;
+ }
+ 
+@@ -74,10 +75,13 @@
+ .monaco-dialog-box .dialog-message-row .dialog-message-container .dialog-message {
+ 	line-height: 22px;
+ 	font-size: 18px;
+-	flex: 1; /* let the message always grow */
++	flex: 1;
++	/* let the message always grow */
+ 	white-space: normal;
+-	word-wrap: break-word; /* never overflow long words, but break to next line */
+-	min-height: 48px; /* matches icon height */
++	word-wrap: break-word;
++	/* never overflow long words, but break to next line */
++	min-height: 48px;
++	/* matches icon height */
+ 	margin-bottom: 8px;
+ 	display: flex;
+ 	align-items: center;
+@@ -86,7 +90,8 @@
+ /** Dialog: Details */
+ .monaco-dialog-box .dialog-message-row .dialog-message-container .dialog-message-detail {
+ 	line-height: 22px;
+-	flex: 1; /* let the message always grow */
++	flex: 1;
++	/* let the message always grow */
+ }
+ 
+ .monaco-dialog-box .dialog-message-row .dialog-message-container .dialog-message a:focus {
+@@ -122,33 +127,36 @@
+ }
+ 
+ /** Dialog: Buttons Row */
+-.monaco-dialog-box > .dialog-buttons-row {
++.monaco-dialog-box>.dialog-buttons-row {
+ 	display: flex;
+ 	align-items: center;
+ 	padding-right: 1px;
+-	overflow: hidden; /* buttons row should never overflow */
++	overflow: hidden;
++	/* buttons row should never overflow */
+ }
+ 
+-.monaco-dialog-box > .dialog-buttons-row {
++.monaco-dialog-box>.dialog-buttons-row {
+ 	display: flex;
+ 	white-space: nowrap;
+ 	padding: 20px 10px 10px;
+ }
+ 
+ /** Dialog: Buttons */
+-.monaco-dialog-box > .dialog-buttons-row > .dialog-buttons {
++.monaco-dialog-box>.dialog-buttons-row>.dialog-buttons {
+ 	display: flex;
+ 	width: 100%;
+ 	justify-content: flex-end;
+ 	overflow: hidden;
+-	margin-left: 67px; /* for long buttons, force align with text */
++	margin-left: 67px;
++	/* for long buttons, force align with text */
+ }
+ 
+-.monaco-dialog-box > .dialog-buttons-row > .dialog-buttons > .monaco-button {
++.monaco-dialog-box>.dialog-buttons-row>.dialog-buttons>.monaco-button {
+ 	width: fit-content;
+ 	padding: 5px 10px;
+ 	overflow: hidden;
+ 	text-overflow: ellipsis;
+-	margin: 4px 5px; /* allows button focus outline to be visible */
++	margin: 4px 5px;
++	/* allows button focus outline to be visible */
+ 	outline-offset: 2px !important;
+ }
 diff --git a/src/vs/code/browser/workbench/workbench-dev.html b/src/vs/code/browser/workbench/workbench-dev.html
 index be6d30bfb98..254cf2af0e3 100644
 --- a/src/vs/code/browser/workbench/workbench-dev.html
@@ -155,7 +245,7 @@ index 92898523ed1..92bd5522301 100644
  					appDataPath = process.env['XDG_CONFIG_HOME'] || path.join(os.homedir(), '.config');
  					break;
 diff --git a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
-index e9e83dcd70f..d358648d233 100644
+index e9e83dcd70f..9f0660dc378 100644
 --- a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
 +++ b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
 @@ -5,7 +5,7 @@
@@ -172,7 +262,7 @@ index e9e83dcd70f..d358648d233 100644
  			type: 'string',
  			enum: ['code', 'keyCode'],
 -			default: 'code',
-+			default: isAndroid?'keyCode':'code',
++			default: isAndroid ? 'keyCode' : 'code',
  			markdownDescription: nls.localize('dispatch', "Controls the dispatching logic for key presses to use either `code` (recommended) or `keyCode`."),
  			included: OS === OperatingSystem.Macintosh || OS === OperatingSystem.Linux
  		},
