@@ -149,8 +149,8 @@ jobs:
               }
               
               ## Build modules
-              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty)
-              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty
+              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog)
+              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog
               replace_watcher "${_RELEASE_DIR}"
               android_fix_ptyhostmainjs "${_RELEASE_DIR}"
               replace_node "${_RELEASE_DIR}"
