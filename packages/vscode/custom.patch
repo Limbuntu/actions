@@ -154,28 +154,6 @@ index 92898523ed1..92bd5522301 100644
  				case 'linux':
  					appDataPath = process.env['XDG_CONFIG_HOME'] || path.join(os.homedir(), '.config');
  					break;
-diff --git a/src/vs/platform/extensionManagement/common/extensionManagementUtil.ts b/src/vs/platform/extensionManagement/common/extensionManagementUtil.ts
-index e7e7bab19e6..4551c26da0e 100644
---- a/src/vs/platform/extensionManagement/common/extensionManagementUtil.ts
-+++ b/src/vs/platform/extensionManagement/common/extensionManagementUtil.ts
-@@ -7,7 +7,7 @@ import { compareIgnoreCase } from 'vs/base/common/strings';
- import { IExtensionIdentifier, IGalleryExtension, ILocalExtension, getTargetPlatform } from 'vs/platform/extensionManagement/common/extensionManagement';
- import { ExtensionIdentifier, IExtension, TargetPlatform, UNDEFINED_PUBLISHER } from 'vs/platform/extensions/common/extensions';
- import { IFileService } from 'vs/platform/files/common/files';
--import { isLinux, platform } from 'vs/base/common/platform';
-+import { Platform, isAndroid, isLinux, platform } from 'vs/base/common/platform';
- import { URI } from 'vs/base/common/uri';
- import { getErrorMessage } from 'vs/base/common/errors';
- import { ILogService } from 'vs/platform/log/common/log';
-@@ -190,7 +190,7 @@ async function isAlpineLinux(fileService: IFileService, logService: ILogService)
- 
- export async function computeTargetPlatform(fileService: IFileService, logService: ILogService): Promise<TargetPlatform> {
- 	const alpineLinux = await isAlpineLinux(fileService, logService);
--	const targetPlatform = getTargetPlatform(alpineLinux ? 'alpine' : platform, arch);
-+	const targetPlatform = getTargetPlatform(alpineLinux ? 'alpine' : isAndroid ? Platform.Linux : platform, arch);
- 	logService.debug('ComputeTargetPlatform:', targetPlatform);
- 	return targetPlatform;
- }
 diff --git a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
 index e9e83dcd70f..d358648d233 100644
 --- a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
@@ -233,3 +211,24 @@ index 552e59959ab..1842d32a2b4 100644
  				this.menubar.blur();
  			}
  		}));
+diff --git a/src/vs/workbench/services/extensionManagement/common/webExtensionManagementService.ts b/src/vs/workbench/services/extensionManagement/common/webExtensionManagementService.ts
+index 0888264e45f..8d4278d9db8 100644
+--- a/src/vs/workbench/services/extensionManagement/common/webExtensionManagementService.ts
++++ b/src/vs/workbench/services/extensionManagement/common/webExtensionManagementService.ts
+@@ -22,6 +22,7 @@ import { compare } from 'vs/base/common/strings';
+ import { IUserDataProfilesService } from 'vs/platform/userDataProfile/common/userDataProfile';
+ import { IUriIdentityService } from 'vs/platform/uriIdentity/common/uriIdentity';
+ import { DisposableStore } from 'vs/base/common/lifecycle';
++import { isAndroid } from 'vs/base/common/platform';
+ 
+ export class WebExtensionManagementService extends AbstractExtensionManagementService implements IProfileAwareExtensionManagementService {
+ 
+@@ -73,7 +74,7 @@ export class WebExtensionManagementService extends AbstractExtensionManagementSe
+ 	}
+ 
+ 	async getTargetPlatform(): Promise<TargetPlatform> {
+-		return TargetPlatform.WEB;
++		return isAndroid ? TargetPlatform.LINUX_ARM64 : TargetPlatform.WEB;
+ 	}
+ 
+ 	override async canInstall(gallery: IGalleryExtension): Promise<boolean> {
