@@ -140,7 +140,7 @@ jobs:
               replace_node "${_RELEASE_DIR}"
 
               ## Fake android as linux to install online extensions
-              sed -i '5aexport NODE_OPTIONS="--require "$ROOT/out/android-as-linux.js"\n' "${_RELEASE_DIR}/bin/code-server-oss"
+              sed -i '10aexport NODE_OPTIONS="--require "$ROOT/out/android-as-linux.js"\n' "${_RELEASE_DIR}/bin/code-server-oss"
               cp "${GITHUB_WORKSPACE}/packages/vscode/android-as-linux.js" "${_RELEASE_DIR}/out/"
               ;;
             esac
