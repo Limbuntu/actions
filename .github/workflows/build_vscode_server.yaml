@@ -103,15 +103,6 @@ jobs:
               export CC="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET}"
               export CXX="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET} -L${_TMP_BUILD_DIR}/lib"
 
-              android_fix_ptyhostmainjs() {
-                if test $# -gt 0 && test -d "$1"; then
-                  find "${1}" -name "ptyHostMain.js" | while IFS= read -r file; do
-                    echo "fix ptyMainHost.js (${file})"
-                    sed -i 's|;case"linux":|;case"android":case"linux":|' "${file}"
-                  done
-                fi
-              }
-
               replace_watcher() {
                 (
                   dir=$(find "$1" -name "watcher" -path "*/node_modules/@parcel/watcher")
@@ -152,7 +143,6 @@ jobs:
               (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog)
               replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog
               replace_watcher "${_RELEASE_DIR}"
-              android_fix_ptyhostmainjs "${_RELEASE_DIR}"
               replace_node "${_RELEASE_DIR}"
 
               ## Fake android as linux to install online extensions
