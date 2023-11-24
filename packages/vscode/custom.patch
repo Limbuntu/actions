@@ -154,6 +154,28 @@ index 92898523ed1..92bd5522301 100644
  				case 'linux':
  					appDataPath = process.env['XDG_CONFIG_HOME'] || path.join(os.homedir(), '.config');
  					break;
+diff --git a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
+index e9e83dcd70f..d358648d233 100644
+--- a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
++++ b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
+@@ -5,7 +5,7 @@
+ 
+ import * as nls from 'vs/nls';
+ import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
+-import { OS, OperatingSystem } from 'vs/base/common/platform';
++import { OS, OperatingSystem, isAndroid } from 'vs/base/common/platform';
+ import { ConfigurationScope, Extensions as ConfigExtensions, IConfigurationNode, IConfigurationRegistry } from 'vs/platform/configuration/common/configurationRegistry';
+ import { Registry } from 'vs/platform/registry/common/platform';
+ 
+@@ -37,7 +37,7 @@ const keyboardConfiguration: IConfigurationNode = {
+ 			scope: ConfigurationScope.APPLICATION,
+ 			type: 'string',
+ 			enum: ['code', 'keyCode'],
+-			default: 'code',
++			default: isAndroid?'keyCode':'code',
+ 			markdownDescription: nls.localize('dispatch', "Controls the dispatching logic for key presses to use either `code` (recommended) or `keyCode`."),
+ 			included: OS === OperatingSystem.Macintosh || OS === OperatingSystem.Linux
+ 		},
 diff --git a/src/vs/platform/quickinput/browser/quickInputController.ts b/src/vs/platform/quickinput/browser/quickInputController.ts
 index 86976df649f..f4f759b7a79 100644
 --- a/src/vs/platform/quickinput/browser/quickInputController.ts
