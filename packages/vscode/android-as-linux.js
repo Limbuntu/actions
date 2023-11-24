@@ -1,6 +1,5 @@
 Object.defineProperty(process, "platform", {
-    get() {
-      return "linux"
-    },
-  })
-  
+  get() {
+    return "linux";
+  },
+});
