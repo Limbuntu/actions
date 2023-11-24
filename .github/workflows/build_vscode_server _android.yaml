@@ -1,4 +1,4 @@
-name: Build vscode server
+name: Build vscode server android
 on:
   workflow_dispatch:
     inputs:
