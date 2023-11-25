@@ -1,5 +1,5 @@
 diff --git a/product.json b/product.json
-index 605d8f117ee..5fc856638c8 100644
+index 605d8f1..5fc8566 100644
 --- a/product.json
 +++ b/product.json
 @@ -80,5 +80,52 @@
@@ -57,7 +57,7 @@ index 605d8f117ee..5fc856638c8 100644
 +	}
  }
 diff --git a/src/vs/base/browser/touch.ts b/src/vs/base/browser/touch.ts
-index dd74dca3eb4..129613f56f1 100644
+index dd74dca..129613f 100644
 --- a/src/vs/base/browser/touch.ts
 +++ b/src/vs/base/browser/touch.ts
 @@ -73,6 +73,7 @@ export class Gesture extends Disposable {
@@ -91,7 +91,7 @@ index dd74dca3eb4..129613f56f1 100644
  			this.dispatched = false;
  		}
 diff --git a/src/vs/base/browser/ui/contextview/contextview.ts b/src/vs/base/browser/ui/contextview/contextview.ts
-index d8156d1b3bb..d146bcc04fe 100644
+index d8156d1..d146bcc 100644
 --- a/src/vs/base/browser/ui/contextview/contextview.ts
 +++ b/src/vs/base/browser/ui/contextview/contextview.ts
 @@ -246,7 +246,7 @@ export class ContextView extends Disposable {
@@ -104,7 +104,7 @@ index d8156d1b3bb..d146bcc04fe 100644
  			return;
  		}
 diff --git a/src/vs/base/browser/ui/dialog/dialog.css b/src/vs/base/browser/ui/dialog/dialog.css
-index 9b7681e1fa8..023a901efe8 100644
+index 9b7681e..023a901 100644
 --- a/src/vs/base/browser/ui/dialog/dialog.css
 +++ b/src/vs/base/browser/ui/dialog/dialog.css
 @@ -25,7 +25,7 @@
@@ -207,7 +207,7 @@ index 9b7681e1fa8..023a901efe8 100644
  	outline-offset: 2px !important;
  }
 diff --git a/src/vs/code/browser/workbench/workbench-dev.html b/src/vs/code/browser/workbench/workbench-dev.html
-index be6d30bfb98..254cf2af0e3 100644
+index be6d30b..254cf2a 100644
 --- a/src/vs/code/browser/workbench/workbench-dev.html
 +++ b/src/vs/code/browser/workbench/workbench-dev.html
 @@ -14,7 +14,7 @@
@@ -220,7 +220,7 @@ index be6d30bfb98..254cf2af0e3 100644
  		<!-- Workbench Configuration -->
  		<meta id="vscode-workbench-web-configuration" data-settings="{{WORKBENCH_WEB_CONFIGURATION}}">
 diff --git a/src/vs/code/browser/workbench/workbench.html b/src/vs/code/browser/workbench/workbench.html
-index addc28f0c4d..d785a76d088 100644
+index addc28f..d785a76 100644
 --- a/src/vs/code/browser/workbench/workbench.html
 +++ b/src/vs/code/browser/workbench/workbench.html
 @@ -14,7 +14,7 @@
@@ -233,7 +233,7 @@ index addc28f0c4d..d785a76d088 100644
  		<!-- Workbench Configuration -->
  		<meta id="vscode-workbench-web-configuration" data-settings="{{WORKBENCH_WEB_CONFIGURATION}}">
 diff --git a/src/vs/platform/environment/node/userDataPath.js b/src/vs/platform/environment/node/userDataPath.js
-index 92898523ed1..92bd5522301 100644
+index 9289852..92bd552 100644
 --- a/src/vs/platform/environment/node/userDataPath.js
 +++ b/src/vs/platform/environment/node/userDataPath.js
 @@ -91,6 +91,7 @@
@@ -245,7 +245,7 @@ index 92898523ed1..92bd5522301 100644
  					appDataPath = process.env['XDG_CONFIG_HOME'] || path.join(os.homedir(), '.config');
  					break;
 diff --git a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
-index e9e83dcd70f..9f0660dc378 100644
+index e9e83dc..9f0660d 100644
 --- a/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
 +++ b/src/vs/platform/keyboardLayout/common/keyboardConfig.ts
 @@ -5,7 +5,7 @@
@@ -267,7 +267,7 @@ index e9e83dcd70f..9f0660dc378 100644
  			included: OS === OperatingSystem.Macintosh || OS === OperatingSystem.Linux
  		},
 diff --git a/src/vs/platform/quickinput/browser/quickInputController.ts b/src/vs/platform/quickinput/browser/quickInputController.ts
-index 86976df649f..f4f759b7a79 100644
+index 86976df..f4f759b 100644
 --- a/src/vs/platform/quickinput/browser/quickInputController.ts
 +++ b/src/vs/platform/quickinput/browser/quickInputController.ts
 @@ -677,7 +677,7 @@ export class QuickInputController extends Disposable {
@@ -279,8 +279,30 @@ index 86976df649f..f4f759b7a79 100644
  			style.width = width + 'px';
  			style.marginLeft = '-' + (width / 2) + 'px';
  
+diff --git a/src/vs/workbench/browser/layout.ts b/src/vs/workbench/browser/layout.ts
+index a3adccf..188960b 100644
+--- a/src/vs/workbench/browser/layout.ts
++++ b/src/vs/workbench/browser/layout.ts
+@@ -8,7 +8,7 @@ import { Event, Emitter } from 'vs/base/common/event';
+ import { EventType, addDisposableListener, getClientArea, Dimension, position, size, IDimension, isAncestorUsingFlowTo, computeScreenAwareSize, getActiveDocument, getWindows, getActiveWindow, focusWindow } from 'vs/base/browser/dom';
+ import { onDidChangeFullscreen, isFullscreen, isWCOEnabled } from 'vs/base/browser/browser';
+ import { IWorkingCopyBackupService } from 'vs/workbench/services/workingCopy/common/workingCopyBackup';
+-import { isWindows, isLinux, isMacintosh, isWeb, isNative, isIOS } from 'vs/base/common/platform';
++import { isWindows, isLinux, isMacintosh, isWeb, isNative, isIOS, isAndroid } from 'vs/base/common/platform';
+ import { EditorInputCapabilities, GroupIdentifier, isResourceEditorInput, IUntypedEditorInput, pathsToEditors } from 'vs/workbench/common/editor';
+ import { SidebarPart } from 'vs/workbench/browser/parts/sidebar/sidebarPart';
+ import { PanelPart } from 'vs/workbench/browser/parts/panel/panelPart';
+@@ -1753,7 +1753,7 @@ export abstract class Layout extends Disposable implements IWorkbenchLayoutServi
+ 		let focusEditor = false;
+ 		if (hidden && this.paneCompositeService.getActivePaneComposite(ViewContainerLocation.Panel)) {
+ 			this.paneCompositeService.hideActivePaneComposite(ViewContainerLocation.Panel);
+-			focusEditor = isIOS ? false : true; // Do not auto focus on ios #127832
++			focusEditor = isIOS||isAndroid ? false : true; // Do not auto focus on ios #127832
+ 		}
+ 
+ 		// If panel part becomes visible, show last active panel or default panel
 diff --git a/src/vs/workbench/browser/parts/titlebar/menubarControl.ts b/src/vs/workbench/browser/parts/titlebar/menubarControl.ts
-index 552e59959ab..1842d32a2b4 100644
+index 552e599..1842d32 100644
 --- a/src/vs/workbench/browser/parts/titlebar/menubarControl.ts
 +++ b/src/vs/workbench/browser/parts/titlebar/menubarControl.ts
 @@ -11,7 +11,7 @@ import { IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
