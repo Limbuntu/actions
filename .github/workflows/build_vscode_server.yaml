@@ -158,7 +158,7 @@ jobs:
 
               ## Fake android as linux to install online extensions
               sed -i '10aexport NODE_OPTIONS="--require $ROOT/out/android-as-linux.js"' "${_RELEASE_DIR}/bin/code-server-oss"
-              cp "${GITHUB_WORKSPACE}/packages/vscode/android-as-linux.js" "${_RELEASE_DIR}/out/"
+              echo 'Object.defineProperty(process, "platform", { get() { return "linux"; } });' >"${_RELEASE_DIR}/out/android-as-linux.js"
               ;;
             esac
           }
