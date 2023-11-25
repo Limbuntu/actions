@@ -235,16 +235,16 @@ jobs:
         working-directory: node-v${{ github.event.inputs.node_version }}/out
         run: |
           tar -c nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }} \
-          | gzip > nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}.tar.gz
+          | xz -T0 > nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}.tar.xz
 
-          tar -c Release | gzip > Release_dir.tar.gz
+          tar -c Release | xz -T0 > Release_dir.tar.xz
 
       - uses: actions/upload-artifact@main
         with:
           name: nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}
-          path: node-v${{ github.event.inputs.node_version }}/out/nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}.tar.gz
+          path: node-v${{ github.event.inputs.node_version }}/out/nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}.tar.xz
 
       - uses: actions/upload-artifact@main
         with:
           name: Release_dir
-          path: node-v${{ github.event.inputs.node_version }}/out/Release_dir.tar.gz
+          path: node-v${{ github.event.inputs.node_version }}/out/Release_dir.tar.xz
