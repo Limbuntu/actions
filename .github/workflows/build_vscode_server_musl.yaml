@@ -1,4 +1,4 @@
-name: Build vscode server
+name: Build vscode server musl
 on:
   workflow_dispatch:
     inputs:
@@ -62,24 +62,14 @@ jobs:
             sudo apt install build-essential python-is-python3
             yarn global add node-gyp
 
-            replace_ripgrep(){
-              (
-                cd "${1}/node_modules/@vscode/ripgrep/bin"
-                curl -Lk "${RIPGREP_RELEASE_URL}" | gzip -d | tar -x
-              )
-            }
-
             matrix_task="$1"
             case "${matrix_task}" in
             vscode-reh-web-linux-x64*)
-              RIPGREP_RELEASE_URL=https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
               yarn || yarn || yarn
               yarn gulp $matrix_task
-              replace_ripgrep "${PWD}/../vscode-reh-web-linux-x64"
               ;;
             vscode-reh-web-linux-arm64*)
-              RIPGREP_RELEASE_URL=https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-aarch64-unknown-linux-musl.tar.gz
               sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               TARGET=aarch64-linux-gnu
               SYSROOT=${PWD}/../aarch64-linux-ubuntu
@@ -90,7 +80,6 @@ jobs:
               export npm_config_arch=aarch64
               yarn || yarn || yarn
               yarn gulp $matrix_task
-              replace_ripgrep "${PWD}/../vscode-reh-web-linux-arm64"
               ;;
             vscode-reh-web-android-arm64*)
               ## Modify based on linux-arm64
@@ -149,16 +138,29 @@ jobs:
                 curl -Lk https://github.com/zongou/build-workflow/releases/download/0.0.0/nodejs-${node_version}-android24-arm64.tar.gz | gzip -d | tar -x "nodejs-${node_version}-android24-arm64/bin/node" -O >"${_RELEASE_DIR}/node"
                 chmod +x "${1}/node"
               }
-
+              
               ## Build modules
-              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog)
-              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog
+              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog @vscode/ripgrep)
+              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog @vscode/ripgrep
               replace_watcher "${_RELEASE_DIR}"
               replace_node "${_RELEASE_DIR}"
 
               ## Fake android as linux to install online extensions
               sed -i '10aexport NODE_OPTIONS="--require $ROOT/out/android-as-linux.js"' "${_RELEASE_DIR}/bin/code-server-oss"
               cp "${GITHUB_WORKSPACE}/packages/vscode/android-as-linux.js" "${_RELEASE_DIR}/out/"
+              ;;
+            vscode-reh-web-alpine-arm64*)
+              # https://unofficial-builds.nodejs.org/download/release/v18.15.0/node-v18.15.0-linux-x64-musl.tar.xz
+              # sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+              TARGET=aarch64-linux-musl
+              # SYSROOT=${PWD}/../aarch64-linux-ubuntu
+              ## aarch64 rootfs
+              # sudo debootstrap --variant=minbase --arch=arm64 --include="libx11-dev,libxkbfile-dev,libsecret-1-dev,libkrb5-dev" stable "${SYSROOT}" http://deb.debian.org/debian/
+              export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
+              export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
+              export npm_config_arch=aarch64
+              yarn || yarn || yarn
+              yarn gulp $matrix_task
               ;;
             esac
           }
