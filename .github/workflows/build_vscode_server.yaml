@@ -2,9 +2,9 @@ name: Build vscode server
 on:
   workflow_dispatch:
     inputs:
-      commit:
-        description: "git commit:"
-        default: 1a5daa3a0231a0fbba4f14db7ec463cf99d7768e
+      branch:
+        description: "vscode branch:"
+        default: release/1.84
         required: true
 
 jobs:
@@ -39,9 +39,8 @@ jobs:
 
       - name: Fetch source code and patch
         run: |
-          git clone https://github.com/microsoft/vscode
+          git clone https://github.com/microsoft/vscode --branch=${{ github.event.inputs.branch }} --single-branch --depth=1
           cd vscode
-          git checkout ${{ github.event.inputs.commit }}
 
           if test -f ${GITHUB_WORKSPACE}/packages/vscode/custom.patch; then
             echo "Patching source code..."
@@ -163,7 +162,7 @@ jobs:
             esac
           }
 
-          build_task "${{ matrix.tasks}}"
+          build_task "${{ matrix.tasks }}"
 
       - name: Test output
         run: |
