@@ -1,4 +1,5 @@
 name: Workflow template
+run-name:  ${{ format('Workflow template {0} {1} {2}', 'Mona', 'the', 'Octocat') }}
 on:
   workflow_dispatch:
     inputs:
@@ -15,11 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target_arch: [x64, arm64]
+        target_arch: [matrix0, matrix1]
 
     steps:
       - uses: actions/checkout@main
-      - name: Checkout repository
+      - name: Checkout repository and print enviroment
         shell: bash {0}
         env:
           PACKAGE_VARIANT: ${{ matrix.target_arch }}
@@ -28,14 +29,34 @@ jobs:
           cat /proc/cpuinfo
           tree -L 2 ${GITHUB_WORKSPACE}
 
+          heredoc(){
+            cat <<EOF
+          heredoc_content
+          EOF
+
+            cat <<EOF
+            heredoc_content
+          EOF
+
+            cat <<-EOF
+          heredoc_content
+          EOF
+
+          cat <<-EOF
+            heredoc_content
+          EOF
+          }
+
+          heredoc
+
       - name: Create files
         run: |
           echo "echo hello world" > echo_hello
           chmod +x echo_hello
-          tar -c echo_hello | gzip > echo_hello.tar.gz
+          tar -c echo_hello | xz -T0 > echo_hello.tar.xz
 
       - name: Upload
         uses: actions/upload-artifact@main
         with:
-          name: workflow_template
-          path: echo_hello
+          name: echo_hello
+          path: echo_hello.tar.xz
