@@ -41,7 +41,7 @@ jobs:
           # aliyun=https://registry.npmmirror.com/-/binary/node
           # tencent=http://mirrors.cloud.tencent.com/nodejs
 
-          case default in
+          case ${{ github.event.inputs.node_mirror }} in
           default)
               git clone --depth=1 https://github.com/nodejs/node -b v${{ github.event.inputs.node_version }}
               mv node node-v${{ github.event.inputs.node_version }}
