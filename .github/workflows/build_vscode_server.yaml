@@ -140,8 +140,8 @@ jobs:
               }
               
               ## Build modules
-              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog)
-              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog
+              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog @vscode/ripgrep)
+              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog @vscode/ripgrep
               replace_watcher "${_RELEASE_DIR}"
               replace_node "${_RELEASE_DIR}"
 
