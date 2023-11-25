@@ -61,24 +61,14 @@ jobs:
             sudo apt install build-essential python-is-python3
             yarn global add node-gyp
 
-            replace_ripgrep(){
-              (
-                cd "${1}/node_modules/@vscode/ripgrep/bin"
-                curl -Lk "${RIPGREP_PREBUILT_URL}" | gzip -d | tar -x
-              )
-            }
-
             matrix_task="$1"
             case "${matrix_task}" in
             vscode-reh-web-linux-x64*)
-              RIPGREP_PREBUILT_URL=https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-x86_64-unknown-linux-musl.tar.gz
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
               yarn || yarn || yarn
               yarn gulp $matrix_task
-              replace_ripgrep "${PWD}/../vscode-reh-web-linux-x64"
               ;;
             vscode-reh-web-linux-arm64*)
-              RIPGREP_PREBUILT_URL=https://github.com/microsoft/ripgrep-prebuilt/releases/download/v13.0.0-10/ripgrep-v13.0.0-10-aarch64-unknown-linux-musl.tar.gz
               sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               TARGET=aarch64-linux-gnu
               SYSROOT=${PWD}/../aarch64-linux-ubuntu
@@ -86,10 +76,9 @@ jobs:
               sudo debootstrap --variant=minbase --arch=arm64 --include="libx11-dev,libxkbfile-dev,libsecret-1-dev,libkrb5-dev" stable "${SYSROOT}" http://deb.debian.org/debian/
               export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
               export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
-              export npm_config_arch=aarch64
+              export npm_config_arch=arm64
               yarn || yarn || yarn
               yarn gulp $matrix_task
-              replace_ripgrep "${PWD}/../vscode-reh-web-linux-arm64"
               ;;
             vscode-reh-web-android-arm64*)
               ## Modify based on linux-arm64
@@ -98,7 +87,7 @@ jobs:
               _RELEASE_DIR="${PWD}/../vscode-reh-web-android-arm64"
               mv "${PWD}/../vscode-reh-web-linux-arm64" "${_RELEASE_DIR}"
 
-              export npm_config_arch=aarch64
+              export npm_config_arch=arm64
               export GYP_DEFINES="host_os=linux OS=android"
 
               ## Android libutil
