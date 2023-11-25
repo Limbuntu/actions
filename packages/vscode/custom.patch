@@ -206,18 +206,6 @@ index 9b7681e1fa8..023a901efe8 100644
 +	/* allows button focus outline to be visible */
  	outline-offset: 2px !important;
  }
-diff --git a/src/vs/base/common/platform.ts b/src/vs/base/common/platform.ts
-index c752f32550f..623ff5493ea 100644
---- a/src/vs/base/common/platform.ts
-+++ b/src/vs/base/common/platform.ts
-@@ -89,6 +89,7 @@ if (typeof navigator === 'object' && !isElectronRenderer) {
- 	_isLinux = _userAgent.indexOf('Linux') >= 0;
- 	_isMobile = _userAgent?.indexOf('Mobi') >= 0;
- 	_isWeb = true;
-+	console.log("web env");
- 
- 	const configuredLocale = nls.getConfiguredDefaultLocale(
- 		// This call _must_ be done in the file that calls `nls.getConfiguredDefaultLocale`
 diff --git a/src/vs/code/browser/workbench/workbench-dev.html b/src/vs/code/browser/workbench/workbench-dev.html
 index be6d30bfb98..254cf2af0e3 100644
 --- a/src/vs/code/browser/workbench/workbench-dev.html
