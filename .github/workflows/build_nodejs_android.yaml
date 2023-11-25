@@ -5,11 +5,11 @@ on:
     inputs:
       node_version:
         description: "node version:"
-        default: 20.9.0
+        default: 20.10.0
         required: true
       android_sdk_version:
         description: "android sdk version:"
-        default: 24
+        default: "24"
         required: true
       target_arch:
         description: "target arch:"
