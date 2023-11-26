@@ -1,4 +1,5 @@
 name: Build vscode server
+run-name: Build vscode server ${{ github.event.inputs.branch }}
 on:
   workflow_dispatch:
     inputs:
