@@ -67,8 +67,8 @@ jobs:
             yarn global add node-gyp
 
             build_fail_retry() {
-              # yarn || yarn || yarn
-              # yarn gulp ${matrix_task} || yarn gulp ${matrix_task} || yarn gulp ${matrix_task}
+              yarn || yarn || yarn
+              yarn gulp ${matrix_task} || yarn gulp ${matrix_task} || yarn gulp ${matrix_task}
             }
 
             matrix_task="$1"
