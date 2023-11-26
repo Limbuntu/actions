@@ -68,7 +68,7 @@ jobs:
             case "${matrix_task}" in
             vscode-reh-web-linux-x64*)
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
-              
+
               yarn || yarn || yarn
               yarn gulp ${matrix_task}
               ;;
@@ -171,9 +171,8 @@ jobs:
               sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev
               
               ## Setup toolchain
-              # curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
+              curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
               TOOLCHAIN=${PWD}/${TARGET}-cross
-              cat /home/user/Downloads/aarch64-linux-musl-cross.tgz | gzip -d | tar -x
               
               export CC="${TOOLCHAIN}/bin/${TARGET}-gcc --sysroot=${SYSROOT}"
               export CXX="${TOOLCHAIN}/bin/${TARGET}-g++ --sysroot=${SYSROOT}"
