@@ -23,7 +23,9 @@ jobs:
             vscode-reh-web-android-arm64,
             vscode-reh-web-android-arm64-min,
             vscode-reh-web-alpine-arm64,
-            vscode-reh-web-alpine-arm64-min
+            vscode-reh-web-alpine-arm64-min,
+            vscode-reh-web-linux-alpine,
+            vscode-reh-web-linux-alpine-min
           ]
 
     steps:
@@ -155,17 +157,27 @@ jobs:
               sed -i '10aexport NODE_OPTIONS="--require $ROOT/out/android-as-linux.js"' "${_RELEASE_DIR}/bin/code-server-oss"
               echo 'Object.defineProperty(process, "platform", { get() { return "linux"; } });' >"${_RELEASE_DIR}/out/android-as-linux.js"
               ;;
-            vscode-reh-web-alpine-arm64*)
-              TARGET=aarch64-linux-musl
-              export npm_config_arch=aarch64
+            vscode-reh-web-alpine-arm64* | vscode-reh-web-linux-alpine*)
+              case "${matrix_task}" in
+              vscode-reh-web-alpine-arm64*)
+                ARCH=aarch64
+                export npm_config_arch=arm64
+                ;;
+              vscode-reh-web-linux-alpine*)
+                ARCH=x86_64
+                export npm_config_arch=${ARCH}
+                ;;
+              esac
+
+              TARGET=${ARCH}-linux-musl
 
               sudo apt install qemu-user-static binfmt-support
               
               ## Setup alpine sysroot
-              SYSROOT="${PWD}/../aarch64-alpine"
+              SYSROOT="${PWD}/../${ARCH}-alpine"
               mkdir -p "${SYSROOT}"
               
-              curl -Lk https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/aarch64/alpine-minirootfs-3.18.4-aarch64.tar.gz | gzip -d | tar -C ${SYSROOT} -x
+              curl -Lk https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/${ARCH}/alpine-minirootfs-3.18.4-${ARCH}.tar.gz | gzip -d | tar -C ${SYSROOT} -x
               
               echo "nameserver 8.8.8.8" >${SYSROOT}/etc/resolv.conf
               sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev
