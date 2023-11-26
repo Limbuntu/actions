@@ -159,6 +159,7 @@ jobs:
                 export npm_config_arch=arm64
                 TARGET=${ARCH}-linux-musl
 
+                echo "Setting up toolchain"
                 curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-cross
                 ;;
@@ -167,6 +168,7 @@ jobs:
                 export npm_config_arch=${ARCH}
                 TARGET=${ARCH}-linux-musl
 
+                echo "Setting up toolchain"
                 curl -Lk https://musl.cc/${TARGET}-native.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-native
                 ;;
