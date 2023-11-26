@@ -82,14 +82,14 @@ jobs:
               TARGET=aarch64-linux-gnu
               export npm_config_arch=arm64
 
-              echo "Setting up toolchain"
-              sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-
               echo "Setting up sysroot"
               sudo apt install qemu-user-static binfmt-support debootstrap 
               SYSROOT=${PWD}/../aarch64-linux-ubuntu
               ## aarch64 rootfs
               sudo debootstrap --variant=minbase --arch=arm64 --include="libx11-dev,libxkbfile-dev,libsecret-1-dev,libkrb5-dev" stable "${SYSROOT}" http://deb.debian.org/debian/
+
+              echo "Setting up toolchain"
+              sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
               export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
 
@@ -161,25 +161,15 @@ jobs:
               vscode-reh-web-alpine-arm64*)
                 ARCH=aarch64
                 export npm_config_arch=arm64
-                TARGET=${ARCH}-linux-musl
-                
-                echo "Setting up toolchain"
-                curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
-                TOOLCHAIN=${PWD}/${TARGET}-cross
                 ;;
                 vscode-reh-web-linux-alpine*)
                 ARCH=x86_64
                 export npm_config_arch=${ARCH}
-                sudo apt install binutils
-                TARGET=${ARCH}-linux-musl
-                
-                echo "Setting up toolchain"
-                curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
-                TOOLCHAIN=${PWD}/${TARGET}-cross
-                cp "$(command -v ld)" "${TOOLCHAIN}/bin/${TARGET}-ld"
                 ;;
                 esac
-              
+                
+              TARGET=${ARCH}-linux-musl
+
               echo "Setting up sysroot"
               sudo apt install qemu-user-static binfmt-support
               SYSROOT="${PWD}/../${ARCH}-alpine"
@@ -188,7 +178,15 @@ jobs:
               curl -Lk https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/${ARCH}/alpine-minirootfs-3.18.4-${ARCH}.tar.gz | gzip -d | tar -C ${SYSROOT} -x
 
               echo "nameserver 8.8.8.8" >${SYSROOT}/etc/resolv.conf
-              sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev build-base
+              sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev libstdc++
+
+              echo "Setting up toolchain"
+              curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
+              TOOLCHAIN=${PWD}/${TARGET}-cross
+
+              case "${ARCH}" in
+              x86_64) cp "$(command -v ld)" "${TOOLCHAIN}/bin/${TARGET}-ld";;
+              esac
 
               export CC="${TOOLCHAIN}/bin/${TARGET}-gcc --sysroot=${SYSROOT}"
               export CXX="${TOOLCHAIN}/bin/${TARGET}-g++ --sysroot=${SYSROOT}"
