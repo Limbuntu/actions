@@ -175,6 +175,9 @@ jobs:
                 echo "Setting up toolchain"
                 curl -Lk https://musl.cc/${TARGET}-native.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-native
+
+                find -path "*/compiler_compat/ld" -name ld
+                find -path "*/compiler_compat/ld" -name ld -exec rm {} \;
                 ;;
               esac
 
