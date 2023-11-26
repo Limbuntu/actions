@@ -157,10 +157,16 @@ jobs:
               vscode-reh-web-alpine-arm64*)
                 ARCH=aarch64
                 export npm_config_arch=arm64
+
+                curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
+                TOOLCHAIN=${PWD}/${TARGET}-cross
                 ;;
               vscode-reh-web-linux-alpine*)
                 ARCH=x86_64
                 export npm_config_arch=${ARCH}
+
+                curl -Lk https://musl.cc/${TARGET}-native.tgz | gzip -d | tar -x
+                TOOLCHAIN=${PWD}/${TARGET}-native
                 ;;
               esac
 
@@ -176,10 +182,6 @@ jobs:
 
               echo "nameserver 8.8.8.8" >${SYSROOT}/etc/resolv.conf
               sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev
-
-              ## Setup toolchain
-              curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
-              TOOLCHAIN=${PWD}/${TARGET}-cross
 
               export CC="${TOOLCHAIN}/bin/${TARGET}-gcc --sysroot=${SYSROOT}"
               export CXX="${TOOLCHAIN}/bin/${TARGET}-g++ --sysroot=${SYSROOT}"
