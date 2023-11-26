@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         tasks:
           [
@@ -66,7 +66,7 @@ jobs:
             sudo apt install build-essential python-is-python3
             yarn global add node-gyp
 
-            build_fail_retry(){
+            build_fail_retry() {
               # yarn || yarn || yarn
               # yarn gulp ${matrix_task} || yarn gulp ${matrix_task} || yarn gulp ${matrix_task}
             }
@@ -88,32 +88,28 @@ jobs:
               sudo debootstrap --variant=minbase --arch=arm64 --include="libx11-dev,libxkbfile-dev,libsecret-1-dev,libkrb5-dev" stable "${SYSROOT}" http://deb.debian.org/debian/
               export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
               export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
-              
+
               build_fail_retry
               ;;
             vscode-reh-web-android-arm64*)
-              TARGET=aarch64-linux-android24
-              export npm_config_arch=arm64
-
               ## Modify based on linux-arm64
               build_task "$(echo "${matrix_task}" | sed 's/android/linux/')"
-              echo "Patching for android..."
+
+              export npm_config_arch=arm64
+              TARGET=aarch64-linux-android24
+
+              echo "Replacing modules for android..."
               _RELEASE_DIR="${PWD}/../vscode-reh-web-android-arm64"
               mv "${PWD}/../vscode-reh-web-linux-arm64" "${_RELEASE_DIR}"
-
               export GYP_DEFINES="host_os=linux OS=android"
-
               ## Android libutil
               _TMP_BUILD_DIR="${PWD}/../tmp_build"
               mkdir -p "${_TMP_BUILD_DIR}/lib"
               echo "INPUT(-lc)" >"${_TMP_BUILD_DIR}/lib/libutil.so"
-
               NDK_BIN_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin
-
               NDK_BIN_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin
               export CC="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET}"
               export CXX="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET} -L${_TMP_BUILD_DIR}/lib"
-
               replace_watcher() {
                 (
                   dir=$(find "$1" -name "watcher" -path "*/node_modules/@parcel/watcher")
@@ -126,36 +122,32 @@ jobs:
                   mv package watcher
                 )
               }
-
               replace_in_dir() {
                 _RELEASE_DIR="$1"
                 shift
                 echo replacing modules ...
                 for module_name in "$@"; do
-                find "${_RELEASE_DIR}" \( -path "*/node_modules/${module_name}" -or -path "*/node_modules/@*/${module_name}" \) -prune | while IFS= read -r module_dir; do
+                  find "${_RELEASE_DIR}" \( -path "*/node_modules/${module_name}" -or -path "*/node_modules/@*/${module_name}" \) -prune | while IFS= read -r module_dir; do
                     echo "replacing ${module_name} (${module_dir})"
                     if test -d "${_TMP_BUILD_DIR}/node_modules/${module_name}"; then
                       rm -rf "${module_dir}" && cp -r "${_TMP_BUILD_DIR}/node_modules/${module_name}" "$(dirname "${module_dir}")"
                     else
                       echo "Warn: ${_TMP_BUILD_DIR}/node_modules/${module_name} not exists!"
-                      fi
+                    fi
                   done
                 done
               }
-
               replace_node() {
                 echo "replacing node"
                 node_version="$(node -v)"
                 curl -Lk https://github.com/zongou/build-workflow/releases/download/0.0.0/nodejs-${node_version}-android24-arm64.tar.gz | gzip -d | tar -x "nodejs-${node_version}-android24-arm64/bin/node" -O >"${_RELEASE_DIR}/node"
                 chmod +x "${1}/node"
               }
-
               ## Build modules
               (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog)
               replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog
               replace_watcher "${_RELEASE_DIR}"
               replace_node "${_RELEASE_DIR}"
-
               ## Fake android as linux to install online extensions
               sed -i '10aexport NODE_OPTIONS="--require $ROOT/out/android-as-linux.js"' "${_RELEASE_DIR}/bin/code-server-oss"
               echo 'Object.defineProperty(process, "platform", { get() { return "linux"; } });' >"${_RELEASE_DIR}/out/android-as-linux.js"
@@ -175,24 +167,24 @@ jobs:
               TARGET=${ARCH}-linux-musl
 
               sudo apt install qemu-user-static binfmt-support
-              
+
               ## Setup alpine sysroot
               SYSROOT="${PWD}/../${ARCH}-alpine"
               mkdir -p "${SYSROOT}"
-              
+
               curl -Lk https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/${ARCH}/alpine-minirootfs-3.18.4-${ARCH}.tar.gz | gzip -d | tar -C ${SYSROOT} -x
-              
+
               echo "nameserver 8.8.8.8" >${SYSROOT}/etc/resolv.conf
               sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev
-              
+
               ## Setup toolchain
               curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
               TOOLCHAIN=${PWD}/${TARGET}-cross
-              
+
               export CC="${TOOLCHAIN}/bin/${TARGET}-gcc --sysroot=${SYSROOT}"
               export CXX="${TOOLCHAIN}/bin/${TARGET}-g++ --sysroot=${SYSROOT}"
-              
-                build_fail_retry
+
+              build_fail_retry
               ;;
             esac
           }
