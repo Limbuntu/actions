@@ -15,12 +15,14 @@ jobs:
       matrix:
         tasks:
           [
-            vscode-reh-web-linux-x64-min,
             vscode-reh-web-linux-x64,
-            vscode-reh-web-linux-arm64-min,
+            vscode-reh-web-linux-x64-min,
             vscode-reh-web-linux-arm64,
+            vscode-reh-web-linux-arm64-min,
+            vscode-reh-web-android-arm64,
             vscode-reh-web-android-arm64-min,
-            vscode-reh-web-android-arm64
+            vscode-reh-web-alpine-arm64,
+            vscode-reh-web-alpine-arm64-min
           ]
 
     steps:
@@ -66,28 +68,32 @@ jobs:
             vscode-reh-web-linux-x64*)
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
               yarn || yarn || yarn
-              yarn gulp $matrix_task
+              yarn gulp ${matrix_task}
               ;;
             vscode-reh-web-linux-arm64*)
-              sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               TARGET=aarch64-linux-gnu
+              export npm_config_arch=arm64
+
+              sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               SYSROOT=${PWD}/../aarch64-linux-ubuntu
               ## aarch64 rootfs
               sudo debootstrap --variant=minbase --arch=arm64 --include="libx11-dev,libxkbfile-dev,libsecret-1-dev,libkrb5-dev" stable "${SYSROOT}" http://deb.debian.org/debian/
               export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
               export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
-              export npm_config_arch=arm64
+              
               yarn || yarn || yarn
-              yarn gulp $matrix_task
+              yarn gulp ${matrix_task}
               ;;
             vscode-reh-web-android-arm64*)
+              TARGET=aarch64-linux-android24
+              export npm_config_arch=arm64
+
               ## Modify based on linux-arm64
               build_task "$(echo "${matrix_task}" | sed 's/android/linux/')"
               echo "Patching for android..."
               _RELEASE_DIR="${PWD}/../vscode-reh-web-android-arm64"
               mv "${PWD}/../vscode-reh-web-linux-arm64" "${_RELEASE_DIR}"
 
-              export npm_config_arch=arm64
               export GYP_DEFINES="host_os=linux OS=android"
 
               ## Android libutil
@@ -96,7 +102,6 @@ jobs:
               echo "INPUT(-lc)" >"${_TMP_BUILD_DIR}/lib/libutil.so"
 
               NDK_BIN_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin
-              TARGET=aarch64-linux-android24
 
               NDK_BIN_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin
               export CC="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET}"
@@ -147,6 +152,30 @@ jobs:
               ## Fake android as linux to install online extensions
               sed -i '10aexport NODE_OPTIONS="--require $ROOT/out/android-as-linux.js"' "${_RELEASE_DIR}/bin/code-server-oss"
               echo 'Object.defineProperty(process, "platform", { get() { return "linux"; } });' >"${_RELEASE_DIR}/out/android-as-linux.js"
+              ;;
+            vscode-reh-web-alpine-arm64*)
+              TARGET=aarch64-linux-musl
+              export npm_config_arch=aarch64
+              
+              ## Setup alpine sysroot
+              SYSROOT="${PWD}/../aarch64-alpine"
+              mkdir -p "${SYSROOT}"
+              
+              curl -Lk https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/aarch64/alpine-minirootfs-3.18.4-aarch64.tar.gz | gzip -d | tar -C ${SYSROOT} -x
+              
+              echo "nameserver 8.8.8.8" >${SYSROOT}/etc/resolv.conf
+              sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev
+              
+              ## Setup toolchain
+              # curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
+              TOOLCHAIN=${PWD}/${TARGET}-cross
+              cat /home/user/Downloads/aarch64-linux-musl-cross.tgz | gzip -d | tar -x
+              
+              export CC="${TOOLCHAIN}/bin/${TARGET}-gcc --sysroot=${SYSROOT}"
+              export CXX="${TOOLCHAIN}/bin/${TARGET}-g++ --sysroot=${SYSROOT}"
+              
+              yarn || yarn || yarn
+              yarn gulp ${matrix_task}
               ;;
             esac
           }
