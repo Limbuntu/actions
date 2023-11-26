@@ -176,6 +176,7 @@ jobs:
                 echo "Setting up toolchain"
                 curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-cross
+                rm "${TOOLCHAIN}/bin/ld"
               
               echo "Setting up sysroot"
               sudo apt install qemu-user-static binfmt-support
