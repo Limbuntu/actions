@@ -177,7 +177,7 @@ jobs:
                 echo "Setting up toolchain"
                 curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-cross
-                cp "$(command -v ld)" "${TOOLCHAIN}/bin/ld"
+                cp "$(command -v ld)" "${TOOLCHAIN}/bin/${TARGET}-ld"
                 ;;
                 esac
               
