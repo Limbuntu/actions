@@ -161,22 +161,25 @@ jobs:
               vscode-reh-web-alpine-arm64*)
                 ARCH=aarch64
                 export npm_config_arch=arm64
-                ;;
-                vscode-reh-web-linux-alpine*)
-                ARCH=x86_64
-                export npm_config_arch=${ARCH}
-                sudo apt install binutils
-                export LINKER="ld"
-                export LD="${LINKER}"
-                ;;
-                esac
-
                 TARGET=${ARCH}-linux-musl
                 
                 echo "Setting up toolchain"
                 curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-cross
                 rm "${TOOLCHAIN}/bin/ld"
+                ;;
+                vscode-reh-web-linux-alpine*)
+                ARCH=x86_64
+                export npm_config_arch=${ARCH}
+                sudo apt install binutils
+                TARGET=${ARCH}-linux-musl
+                
+                echo "Setting up toolchain"
+                curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
+                TOOLCHAIN=${PWD}/${TARGET}-cross
+                cp "$(command -v ld)" "${TOOLCHAIN}/bin/ld"
+                ;;
+                esac
               
               echo "Setting up sysroot"
               sudo apt install qemu-user-static binfmt-support
