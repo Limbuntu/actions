@@ -166,7 +166,6 @@ jobs:
                 echo "Setting up toolchain"
                 curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-cross
-                rm "${TOOLCHAIN}/bin/ld"
                 ;;
                 vscode-reh-web-linux-alpine*)
                 ARCH=x86_64
