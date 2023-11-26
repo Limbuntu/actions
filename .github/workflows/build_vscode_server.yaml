@@ -157,6 +157,7 @@ jobs:
               vscode-reh-web-alpine-arm64*)
                 ARCH=aarch64
                 export npm_config_arch=arm64
+                TARGET=${ARCH}-linux-musl
 
                 curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-cross
@@ -164,13 +165,13 @@ jobs:
               vscode-reh-web-linux-alpine*)
                 ARCH=x86_64
                 export npm_config_arch=${ARCH}
+                TARGET=${ARCH}-linux-musl
 
                 curl -Lk https://musl.cc/${TARGET}-native.tgz | gzip -d | tar -x
                 TOOLCHAIN=${PWD}/${TARGET}-native
                 ;;
               esac
 
-              TARGET=${ARCH}-linux-musl
 
               sudo apt install qemu-user-static binfmt-support
 
