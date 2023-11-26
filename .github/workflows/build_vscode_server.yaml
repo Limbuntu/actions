@@ -166,6 +166,8 @@ jobs:
                 ARCH=x86_64
                 export npm_config_arch=${ARCH}
                 sudo apt install binutils
+                export LINKER="ld"
+                export LD="${LINKER}"
                 ;;
                 esac
 
