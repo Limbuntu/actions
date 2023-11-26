@@ -68,6 +68,7 @@ jobs:
             case "${matrix_task}" in
             vscode-reh-web-linux-x64*)
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
+              
               yarn || yarn || yarn
               yarn gulp ${matrix_task}
               ;;
@@ -157,6 +158,8 @@ jobs:
             vscode-reh-web-alpine-arm64*)
               TARGET=aarch64-linux-musl
               export npm_config_arch=aarch64
+
+              sudo apt install qemu-user-static binfmt-support
               
               ## Setup alpine sysroot
               SYSROOT="${PWD}/../aarch64-alpine"
