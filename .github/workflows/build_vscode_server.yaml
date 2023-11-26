@@ -66,13 +66,17 @@ jobs:
             sudo apt install build-essential python-is-python3
             yarn global add node-gyp
 
+            build_fail_retry(){
+              # yarn || yarn || yarn
+              # yarn gulp ${matrix_task} || yarn gulp ${matrix_task} || yarn gulp ${matrix_task}
+            }
+
             matrix_task="$1"
             case "${matrix_task}" in
             vscode-reh-web-linux-x64*)
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
 
-              yarn || yarn || yarn
-              yarn gulp ${matrix_task}
+              build_fail_retry
               ;;
             vscode-reh-web-linux-arm64*)
               TARGET=aarch64-linux-gnu
@@ -85,8 +89,7 @@ jobs:
               export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
               export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
               
-              yarn || yarn || yarn
-              yarn gulp ${matrix_task}
+              build_fail_retry
               ;;
             vscode-reh-web-android-arm64*)
               TARGET=aarch64-linux-android24
@@ -189,8 +192,7 @@ jobs:
               export CC="${TOOLCHAIN}/bin/${TARGET}-gcc --sysroot=${SYSROOT}"
               export CXX="${TOOLCHAIN}/bin/${TARGET}-g++ --sysroot=${SYSROOT}"
               
-              yarn || yarn || yarn
-              yarn gulp ${matrix_task}
+                build_fail_retry
               ;;
             esac
           }
