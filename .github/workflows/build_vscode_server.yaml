@@ -82,7 +82,11 @@ jobs:
               TARGET=aarch64-linux-gnu
               export npm_config_arch=arm64
 
-              sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+              echo "Setting up toolchain"
+              sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+              echo "Setting up sysroot"
+              sudo apt install qemu-user-static binfmt-support debootstrap 
               SYSROOT=${PWD}/../aarch64-linux-ubuntu
               ## aarch64 rootfs
               sudo debootstrap --variant=minbase --arch=arm64 --include="libx11-dev,libxkbfile-dev,libsecret-1-dev,libkrb5-dev" stable "${SYSROOT}" http://deb.debian.org/debian/
@@ -174,10 +178,9 @@ jobs:
                 ;;
               esac
 
-
+              
+              echo "Setting up sysroot"
               sudo apt install qemu-user-static binfmt-support
-
-              ## Setup alpine sysroot
               SYSROOT="${PWD}/../${ARCH}-alpine"
               mkdir -p "${SYSROOT}"
 
