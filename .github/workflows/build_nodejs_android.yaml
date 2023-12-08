@@ -1,5 +1,5 @@
 name: Build nodejs android
-run-name: Build nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}, mirror:${{ github.event.inputs.node_mirror }}
+run-name: Build nodejs-v${{ github.event.inputs.node_version }}-android-${{ github.event.inputs.target_arch }}, mirror:${{ github.event.inputs.node_mirror }}
 on:
   workflow_dispatch:
     inputs:
@@ -225,7 +225,7 @@ jobs:
         working-directory: node-v${{ github.event.inputs.node_version }}
         run: |
           # [DESTDIR] [PREFIX]
-          python3 tools/install.py install  "out/nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}" ""
+          python3 tools/install.py install  "out/nodejs-v${{ github.event.inputs.node_version }}-android-${{ github.event.inputs.target_arch }}" ""
 
       - name: Tree output files
         run: |
@@ -234,15 +234,15 @@ jobs:
       - name: Create archives
         working-directory: node-v${{ github.event.inputs.node_version }}/out
         run: |
-          tar -c nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }} \
-          | xz -T0 > nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}.tar.xz
+          tar -c nodejs-v${{ github.event.inputs.node_version }}-android-${{ github.event.inputs.target_arch }} \
+          | xz -T0 > nodejs-v${{ github.event.inputs.node_version }}-android-${{ github.event.inputs.target_arch }}.tar.xz
 
           tar -c Release | xz -T0 > Release_dir.tar.xz
 
       - uses: actions/upload-artifact@main
         with:
-          name: nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}
-          path: node-v${{ github.event.inputs.node_version }}/out/nodejs-v${{ github.event.inputs.node_version }}-android${{ github.event.inputs.android_sdk_version }}-${{ github.event.inputs.target_arch }}.tar.xz
+          name: nodejs-v${{ github.event.inputs.node_version }}-android-${{ github.event.inputs.target_arch }}
+          path: node-v${{ github.event.inputs.node_version }}/out/nodejs-v${{ github.event.inputs.node_version }}-android-${{ github.event.inputs.target_arch }}.tar.xz
 
       - uses: actions/upload-artifact@main
         with:
