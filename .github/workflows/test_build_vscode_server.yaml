@@ -1,5 +1,5 @@
-name: Build vscode server
-run-name: Build vscode server ${{ github.event.inputs.commit }}
+name: test Build vscode server
+run-name: test Build vscode server ${{ github.event.inputs.commit }}
 on:
   workflow_dispatch:
     inputs:
