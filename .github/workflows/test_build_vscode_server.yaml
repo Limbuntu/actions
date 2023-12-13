@@ -1,10 +1,10 @@
-name: Build vscode server musl
+name: test Build vscode server
+run-name: Build vscode server ${{ github.event.inputs.commit }}
 on:
   workflow_dispatch:
     inputs:
       commit:
-        description: "git commit:"
-        default: 1a5daa3a0231a0fbba4f14db7ec463cf99d7768e
+        description: "commit:"
         required: true
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
       matrix:
         tasks:
           [
-            vscode-reh-web-alpine-arm64
+            vscode-reh-web-android-arm64
           ]
 
     steps:
@@ -34,13 +34,12 @@ jobs:
 
       - name: Fetch source code and patch
         run: |
-          git clone https://github.com/microsoft/vscode
+          git clone https://github.com/microsoft/vscode --single-branch --depth=1
           cd vscode
-          git checkout ${{ github.event.inputs.commit }}
 
           if test -f ${GITHUB_WORKSPACE}/packages/vscode/custom.patch; then
             echo "Patching source code..."
-            patch --strip=1 < ${GITHUB_WORKSPACE}/packages/vscode/custom.patch --no-backup-if-mismatch -t
+            patch --strip=1 < ${GITHUB_WORKSPACE}/packages/vscode/1.84.patch --no-backup-if-mismatch -t
           fi
 
       - name: Build
@@ -57,47 +56,54 @@ jobs:
             sudo apt install build-essential python-is-python3
             yarn global add node-gyp
 
+            build_fail_retry() {
+              yarn || yarn || yarn
+              yarn gulp ${matrix_task} || yarn gulp ${matrix_task} || yarn gulp ${matrix_task}
+            }
+
             matrix_task="$1"
             case "${matrix_task}" in
             vscode-reh-web-linux-x64*)
               sudo apt install g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
-              yarn || yarn || yarn
-              yarn gulp $matrix_task
+
+              build_fail_retry
               ;;
             vscode-reh-web-linux-arm64*)
-              sudo apt install qemu-user-static binfmt-support debootstrap gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               TARGET=aarch64-linux-gnu
+              export npm_config_arch=arm64
+
+              echo "Setting up sysroot"
+              sudo apt install qemu-user-static binfmt-support debootstrap 
               SYSROOT=${PWD}/../aarch64-linux-ubuntu
               ## aarch64 rootfs
               sudo debootstrap --variant=minbase --arch=arm64 --include="libx11-dev,libxkbfile-dev,libsecret-1-dev,libkrb5-dev" stable "${SYSROOT}" http://deb.debian.org/debian/
+
+              echo "Setting up toolchain"
+              sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               export CC="$(which ${TARGET}-gcc) --sysroot=${SYSROOT}"
               export CXX="$(which ${TARGET}-g++) --sysroot=${SYSROOT}"
-              export npm_config_arch=aarch64
-              yarn || yarn || yarn
-              yarn gulp $matrix_task
+
+              build_fail_retry
               ;;
             vscode-reh-web-android-arm64*)
               ## Modify based on linux-arm64
               build_task "$(echo "${matrix_task}" | sed 's/android/linux/')"
-              echo "Patching for android..."
+
+              export npm_config_arch=arm64
+              TARGET=aarch64-linux-android24
+
+              echo "Replacing modules for android..."
               _RELEASE_DIR="${PWD}/../vscode-reh-web-android-arm64"
               mv "${PWD}/../vscode-reh-web-linux-arm64" "${_RELEASE_DIR}"
-
-              export npm_config_arch=aarch64
               export GYP_DEFINES="host_os=linux OS=android"
-
               ## Android libutil
               _TMP_BUILD_DIR="${PWD}/../tmp_build"
               mkdir -p "${_TMP_BUILD_DIR}/lib"
               echo "INPUT(-lc)" >"${_TMP_BUILD_DIR}/lib/libutil.so"
-
               NDK_BIN_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin
-              TARGET=aarch64-linux-android24
-
               NDK_BIN_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin
               export CC="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET}"
               export CXX="$(command -v "${NDK_BIN_DIR}/clang++") --target=${TARGET} -L${_TMP_BUILD_DIR}/lib"
-
               replace_watcher() {
                 (
                   dir=$(find "$1" -name "watcher" -path "*/node_modules/@parcel/watcher")
@@ -110,68 +116,77 @@ jobs:
                   mv package watcher
                 )
               }
-
               replace_in_dir() {
                 _RELEASE_DIR="$1"
                 shift
                 echo replacing modules ...
                 for module_name in "$@"; do
-                find "${_RELEASE_DIR}" \( -path "*/node_modules/${module_name}" -or -path "*/node_modules/@*/${module_name}" \) -prune | while IFS= read -r module_dir; do
+                  find "${_RELEASE_DIR}" \( -path "*/node_modules/${module_name}" -or -path "*/node_modules/@*/${module_name}" \) -prune | while IFS= read -r module_dir; do
                     echo "replacing ${module_name} (${module_dir})"
                     if test -d "${_TMP_BUILD_DIR}/node_modules/${module_name}"; then
                       rm -rf "${module_dir}" && cp -r "${_TMP_BUILD_DIR}/node_modules/${module_name}" "$(dirname "${module_dir}")"
                     else
                       echo "Warn: ${_TMP_BUILD_DIR}/node_modules/${module_name} not exists!"
-                      fi
+                    fi
                   done
                 done
               }
-
               replace_node() {
                 echo "replacing node"
                 node_version="$(node -v)"
                 curl -Lk https://github.com/zongou/build-workflow/releases/download/0.0.0/nodejs-${node_version}-android24-arm64.tar.gz | gzip -d | tar -x "nodejs-${node_version}-android24-arm64/bin/node" -O >"${_RELEASE_DIR}/node"
                 chmod +x "${1}/node"
               }
-              
               ## Build modules
-              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog @vscode/ripgrep)
-              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog @vscode/ripgrep
+              (cd "${_TMP_BUILD_DIR}" && yarn add @vscode/spdlog node-pty native-watchdog)
+              replace_in_dir "${_RELEASE_DIR}" @vscode/spdlog node-pty native-watchdog
               replace_watcher "${_RELEASE_DIR}"
               replace_node "${_RELEASE_DIR}"
-
               ## Fake android as linux to install online extensions
               sed -i '10aexport NODE_OPTIONS="--require $ROOT/out/android-as-linux.js"' "${_RELEASE_DIR}/bin/code-server-oss"
-              cp "${GITHUB_WORKSPACE}/packages/vscode/android-as-linux.js" "${_RELEASE_DIR}/out/"
+              echo 'Object.defineProperty(process, "platform", { get() { return "linux"; } });' >"${_RELEASE_DIR}/out/android-as-linux.js"
               ;;
-            vscode-reh-web-alpine-arm64*)
-              TARGET=aarch64-linux-musl
-              export npm_config_arch=aarch64
-              
-              ## Setup alpine sysroot
-              SYSROOT="${PWD}/../aarch64-alpine"
+            vscode-reh-web-alpine-arm64* | vscode-reh-web-linux-alpine*)
+              case "${matrix_task}" in
+              vscode-reh-web-alpine-arm64*)
+                ARCH=aarch64
+                export npm_config_arch=arm64
+                ;;
+                vscode-reh-web-linux-alpine*)
+                ARCH=x86_64
+                export npm_config_arch=${ARCH}
+                ;;
+                esac
+                
+              TARGET=${ARCH}-linux-musl
+
+              echo "Setting up sysroot"
+              sudo apt install qemu-user-static binfmt-support
+              SYSROOT="${PWD}/../${ARCH}-alpine"
               mkdir -p "${SYSROOT}"
-              
-              curl -Lk https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/aarch64/alpine-minirootfs-3.18.4-aarch64.tar.gz | gzip -d | tar -C ${SYSROOT} -x
-              
+
+              curl -Lk https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/${ARCH}/alpine-minirootfs-3.18.4-${ARCH}.tar.gz | gzip -d | tar -C ${SYSROOT} -x
+
               echo "nameserver 8.8.8.8" >${SYSROOT}/etc/resolv.conf
-              sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev
-              
-              ## Setup toolchain
-              # curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
+              sudo chroot "${SYSROOT}" apk add libx11-dev libxkbfile-dev libsecret-dev krb5-dev libstdc++
+
+              echo "Setting up toolchain"
+              curl -Lk https://musl.cc/${TARGET}-cross.tgz | gzip -d | tar -x
               TOOLCHAIN=${PWD}/${TARGET}-cross
-              cat /home/user/Downloads/aarch64-linux-musl-cross.tgz | gzip -d | tar -x
-              
+
+              case "${ARCH}" in
+              x86_64) cp "$(command -v ld)" "${TOOLCHAIN}/bin/${TARGET}-ld";;
+              esac
+
               export CC="${TOOLCHAIN}/bin/${TARGET}-gcc --sysroot=${SYSROOT}"
               export CXX="${TOOLCHAIN}/bin/${TARGET}-g++ --sysroot=${SYSROOT}"
-              
-              yarn
-              yarn gulp $matrix_task
+
+              build_fail_retry
               ;;
             esac
           }
 
-          build_task "${{ matrix.tasks}}"
+          build_task "${{ matrix.tasks }}"
 
       - name: Test output
         run: |
