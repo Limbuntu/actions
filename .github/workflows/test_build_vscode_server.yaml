@@ -36,6 +36,7 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vscode --single-branch --depth=1
           cd vscode
+          git reset --hard ${{ github.event.inputs.commit }}
 
           if test -f ${GITHUB_WORKSPACE}/packages/vscode/custom.patch; then
             echo "Patching source code..."
